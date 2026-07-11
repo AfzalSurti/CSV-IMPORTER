@@ -1,0 +1,101 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #0e1015;
+  --surface: #161922;
+  --surface-raised: #1d212c;
+  --border: #262b38;
+  --border-strong: #343b4a;
+  --text: #e9e8e3;
+  --text-muted: #8b93a6;
+  --text-faint: #5b6274;
+  --accent: #f5a623;
+  --accent-soft: #f5a62322;
+  --success: #3ecf8e;
+  --success-soft: #3ecf8e1a;
+  --error: #f0656a;
+  --error-soft: #f0656a1a;
+
+  --font-display: var(--font-space-grotesk);
+  --font-body: var(--font-inter);
+  --font-data: var(--font-jetbrains-mono);
+}
+
+/* Light mode: kept close in structure to dark mode so the accent and
+   pipeline motif read the same, just lifted onto a paper-toned surface. */
+.light {
+  --bg: #f6f4ef;
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --border: #e2ded3;
+  --border-strong: #cdc7b7;
+  --text: #1c1d1f;
+  --text-muted: #6b6a63;
+  --text-faint: #99978d;
+  --accent: #c9791f;
+  --accent-soft: #c9791f1a;
+  --success: #1f9d63;
+  --success-soft: #1f9d631a;
+  --error: #c94040;
+  --error-soft: #c940401a;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-text-faint: var(--text-faint);
+  --color-accent: var(--accent);
+  --color-success: var(--success);
+  --color-error: var(--error);
+  --font-display: var(--font-display);
+  --font-body: var(--font-body);
+  --font-data: var(--font-data);
+}
+
+* {
+  border-color: var(--border);
+}
+
+html {
+  color-scheme: dark;
+}
+html.light {
+  color-scheme: light;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--text);
+}
+
+/* Thin, quiet scrollbars for the data tables */
+.scrollbar-thin::-webkit-scrollbar {
+  height: 8px;
+  width: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
