@@ -102,6 +102,14 @@ function TabButton({
 
 function ImportedTable({ records }: { records: ExtractResponse["imported"] }) {
   const columns = useMemo(() => CRM_FIELDS, []);
+  const parentRef = useRef<HTMLDivElement>(null);
+  const rowVirtualizer = useVirtualizer({
+    count: records.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 46,
+    overscan: 8,
+  });
+  const virtualRows = rowVirtualizer.getVirtualItems();
 
   if (records.length === 0) {
     return <EmptyState message="No records were successfully mapped from this file." />;
@@ -109,42 +117,55 @@ function ImportedTable({ records }: { records: ExtractResponse["imported"] }) {
 
   return (
     <div className="overflow-hidden rounded-xl border border-border">
-      <div className="max-h-[30rem] overflow-auto scrollbar-thin">
-        <table className="w-full border-collapse text-left font-data text-xs">
-          <thead className="sticky top-0 z-10 bg-surface-raised">
-            <tr>
-              {columns.map((col) => (
-                <th
-                  key={col}
-                  className="whitespace-nowrap border-b border-l border-border px-4 py-3 font-medium text-text-muted first:border-l-0"
-                >
-                  {COLUMN_LABELS[col]}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {records.map((record, index) => (
-              <tr key={index} className="odd:bg-transparent even:bg-surface/60">
-                {columns.map((col) => (
-                  <td
-                    key={col}
-                    className="max-w-[14rem] truncate whitespace-nowrap border-b border-l border-border px-4 py-2.5 first:border-l-0"
-                    title={record[col] || ""}
-                  >
-                    {col === "crm_status" && record[col] ? (
-                      <span className={STATUS_COLORS[record[col] as string] || "text-text"}>
-                        {record[col]}
-                      </span>
-                    ) : (
-                      record[col] || <span className="text-text-faint">—</span>
-                    )}
-                  </td>
-                ))}
-              </tr>
+      <div ref={parentRef} className="max-h-[30rem] overflow-auto scrollbar-thin">
+        <div className="min-w-full">
+          <div className="sticky top-0 z-10 grid min-w-full grid-cols-[repeat(15,minmax(14rem,1fr))] gap-x-0 bg-surface-raised">
+            {columns.map((col) => (
+              <div
+                key={col}
+                className="whitespace-nowrap border-b border-l border-border px-4 py-3 font-medium text-text-muted first:border-l-0"
+              >
+                {COLUMN_LABELS[col]}
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+
+          <div style={{ height: `${rowVirtualizer.getTotalSize()}px`, position: "relative" }}>
+            {virtualRows.map((virtualRow) => {
+              const record = records[virtualRow.index];
+              return (
+                <div
+                  key={virtualRow.key}
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    width: "100%",
+                    height: `${virtualRow.size}px`,
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                  className="grid min-w-full grid-cols-[repeat(15,minmax(14rem,1fr))] gap-x-0 odd:bg-transparent even:bg-surface/60"
+                >
+                  {columns.map((col) => (
+                    <div
+                      key={col}
+                      className="max-w-[14rem] truncate whitespace-nowrap border-b border-l border-border px-4 py-2.5 first:border-l-0"
+                      title={record[col] || ""}
+                    >
+                      {col === "crm_status" && record[col] ? (
+                        <span className={STATUS_COLORS[record[col] as string] || "text-text"}>
+                          {record[col]}
+                        </span>
+                      ) : (
+                        record[col] || <span className="text-text-faint">—</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </div>
   );

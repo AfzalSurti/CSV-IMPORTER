@@ -10,20 +10,22 @@ import { ResultsTable } from "@/components/ResultsTable";
 import { ExtractionProgress } from "@/components/ExtractionProgress";
 import { PipelineRail, type Stage } from "@/components/PipelineRail";
 import { ThemeToggle } from "@/components/ThemeToggle";
-import { extractCsv } from "@/lib/api";
+import { extractCsv, extractCsvFile } from "@/lib/api";
 import type { ExtractResponse, RawCsvRow } from "@/lib/types";
 
 export default function Home() {
   const [stage, setStage] = useState<Stage>("upload");
   const [filename, setFilename] = useState("");
   const [rows, setRows] = useState<RawCsvRow[]>([]);
+  const [csvFile, setCsvFile] = useState<File | null>(null);
   const [result, setResult] = useState<ExtractResponse | null>(null);
   const [progress, setProgress] = useState({ batchIndex: 0, totalBatches: 0 });
   const [error, setError] = useState<string | null>(null);
 
-  function handleParsed(name: string, parsedRows: RawCsvRow[]) {
+  function handleParsed(name: string, parsedRows: RawCsvRow[], file: File) {
     setFilename(name);
     setRows(parsedRows);
+    setCsvFile(file);
     setStage("preview");
   }
 
@@ -31,6 +33,7 @@ export default function Home() {
     setStage("upload");
     setFilename("");
     setRows([]);
+    setCsvFile(null);
     setResult(null);
     setError(null);
     setProgress({ batchIndex: 0, totalBatches: 0 });
@@ -41,17 +44,24 @@ export default function Home() {
     setError(null);
     setProgress({ batchIndex: 0, totalBatches: Math.ceil(rows.length / 25) });
 
-    await extractCsv(filename, rows, {
-      onProgress: (batchIndex, totalBatches) => setProgress({ batchIndex, totalBatches }),
-      onDone: (res) => {
+    const callback = {
+      onProgress: (batchIndex: number, totalBatches: number) => setProgress({ batchIndex, totalBatches }),
+      onDone: (res: ExtractResponse) => {
         setResult(res);
         setStage("done");
       },
-      onError: (message) => {
+      onError: (message: string) => {
         setError(message);
         setStage("preview");
       },
-    });
+    };
+
+    if (csvFile) {
+      await extractCsvFile(filename, csvFile, callback);
+      return;
+    }
+
+    await extractCsv(filename, rows, callback);
   }
 
   function downloadResultsCsv() {
@@ -132,17 +142,6 @@ export default function Home() {
                 Confirm &amp; extract with AI <ArrowRight size={15} />
               </button>
             </div>
-          </section>
-        )}
-
-        {stage === "extract" && (
-          <section>
-            <SectionHeading
-              eyebrow="Step 03"
-              title="Extracting"
-              subtitle="Mapping every row into the GrowEasy CRM schema."
-            />
-            <ExtractionProgress batchIndex={progress.batchIndex} totalBatches={progress.totalBatches} />
           </section>
         )}
 

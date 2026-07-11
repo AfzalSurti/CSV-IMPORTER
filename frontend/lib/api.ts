@@ -8,22 +8,7 @@ export interface ExtractCallbacks {
   onError?: (message: string) => void;
 }
 
-/**
- * Calls POST /api/extract on the backend and streams Server-Sent Events
- * back to the UI so the user sees live batch progress instead of a single
- * opaque loading spinner.
- */
-export async function extractCsv(
-  filename: string,
-  rows: RawCsvRow[],
-  callbacks: ExtractCallbacks
-): Promise<void> {
-  const res = await fetch(`${API_URL}/api/extract`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ filename, rows }),
-  });
-
+async function handleSseResponse(res: Response, callbacks: ExtractCallbacks): Promise<void> {
   if (!res.ok || !res.body) {
     const text = await res.text().catch(() => "");
     callbacks.onError?.(text || `Request failed with status ${res.status}`);
@@ -34,8 +19,6 @@ export async function extractCsv(
   const decoder = new TextDecoder();
   let buffer = "";
 
-  // Minimal SSE parser: events are separated by a blank line, each event
-  // has "event: <name>" and "data: <json>" lines.
   while (true) {
     const { done, value } = await reader.read();
     if (done) break;
@@ -61,4 +44,35 @@ export async function extractCsv(
       }
     }
   }
+}
+
+export async function extractCsv(
+  filename: string,
+  rows: RawCsvRow[],
+  callbacks: ExtractCallbacks
+): Promise<void> {
+  const res = await fetch(`${API_URL}/api/extract`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ filename, rows }),
+  });
+
+  await handleSseResponse(res, callbacks);
+}
+
+export async function extractCsvFile(
+  filename: string,
+  csvFile: File,
+  callbacks: ExtractCallbacks
+): Promise<void> {
+  const form = new FormData();
+  form.append("file", csvFile);
+  if (filename) form.append("filename", filename);
+
+  const res = await fetch(`${API_URL}/api/extract-file`, {
+    method: "POST",
+    body: form,
+  });
+
+  await handleSseResponse(res, callbacks);
 }

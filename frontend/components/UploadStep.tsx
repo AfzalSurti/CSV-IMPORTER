@@ -6,7 +6,7 @@ import Papa from "papaparse";
 import type { RawCsvRow } from "@/lib/types";
 
 interface UploadStepProps {
-  onParsed: (filename: string, rows: RawCsvRow[]) => void;
+  onParsed: (filename: string, rows: RawCsvRow[], file: File) => void;
 }
 
 export function UploadStep({ onParsed }: UploadStepProps) {
@@ -37,7 +37,7 @@ export function UploadStep({ onParsed }: UploadStepProps) {
             setError("This CSV has no data rows.");
             return;
           }
-          onParsed(file.name, results.data);
+          onParsed(file.name, results.data, file);
         },
         error: (err) => setError(err.message || "Failed to read the file."),
       });

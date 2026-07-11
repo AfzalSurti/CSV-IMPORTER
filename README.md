@@ -8,8 +8,19 @@ Built for the GrowEasy Software Developer assignment.
 
 ## Live demo
 
-- App: `<add your deployed frontend URL here>`
-- API: `<add your deployed backend URL here>`
+- App: `https://<your-vercel-project>.vercel.app`
+- API: `https://<your-render-service>.onrender.com`
+
+> Replace the entries above with your actual hosted frontend/backend URLs before submission.
+
+### Deployment targets
+- Frontend: Vercel (deploy the `frontend/` folder as a standalone Next.js project)
+- Backend: Render (deploy the `backend/` folder as a Node.js service or Docker service)
+
+On Vercel, set `NEXT_PUBLIC_API_URL` to the backend URL.
+On Render, set `DATABASE_URL`, `OPENROUTER_API_KEY`, `AI_MODEL`, `FRONTEND_URL`, and `APP_URL`.
+
+For Vercel, the frontend uses the App Router and standalone output. For Render, the backend can run from `backend/` with `npm start` or using the provided Dockerfile.
 
 ## Architecture
 
@@ -94,6 +105,10 @@ cp .env.example .env
 npm install
 npm run dev   # http://localhost:4000
 ```
+
+The backend exposes both:
+- `POST /api/extract` for parsed JSON rows
+- `POST /api/extract-file` for raw CSV file uploads via multipart/form-data
 
 The backend creates its own tables on startup (`ensureSchema()` in
 `src/db.ts`) — no manual migration step needed. `migrations/schema.sql` is
