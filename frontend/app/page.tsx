@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { ArrowLeft, ArrowRight, Download, RotateCcw } from "lucide-react";
+import { AppFooter } from "@/components/AppFooter";
+import { AppLogo } from "@/components/AppLogo";
 import { UploadStep } from "@/components/UploadStep";
 import { PreviewTable } from "@/components/PreviewTable";
 import { ResultsTable } from "@/components/ResultsTable";
@@ -78,21 +80,9 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-bg">
-      <header className="border-b border-border">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent font-display text-sm font-bold text-[#0e1015]">
-              G
-            </div>
-            <div>
-              <div className="font-display text-sm font-semibold leading-none text-text">
-                GrowEasy
-              </div>
-              <div className="mt-0.5 text-[11px] leading-none text-text-faint">
-                AI CSV Importer
-              </div>
-            </div>
-          </div>
+      <header className="border-b border-border bg-surface">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-6">
+          <AppLogo />
           <ThemeToggle />
         </div>
       </header>
@@ -156,6 +146,26 @@ export default function Home() {
           </section>
         )}
 
+        {stage === "extract" && (
+          <section>
+            <SectionHeading
+              eyebrow="Step 03"
+              title="Extracting"
+              subtitle="Mapping every row into the GrowEasy CRM schema."
+            />
+            <ExtractionProgress batchIndex={progress.batchIndex} totalBatches={progress.totalBatches} />
+            <div className="mt-6 flex items-center justify-between">
+              <button
+                onClick={() => setStage("preview")}
+                className="flex items-center gap-1.5 text-sm text-text-muted transition-colors hover:text-text"
+              >
+                <ArrowLeft size={14} /> Back to preview
+              </button>
+              <div className="text-sm text-text-faint">Extraction is in progress; you can return to preview if needed.</div>
+            </div>
+          </section>
+        )}
+
         {stage === "done" && result && (
           <section>
             <SectionHeading
@@ -182,6 +192,8 @@ export default function Home() {
           </section>
         )}
       </main>
+
+      <AppFooter />
     </div>
   );
 }
