@@ -1,6 +1,6 @@
 import { Router, type Request, type Response } from "express";
 import multer from "multer";
-import Papa from "papaparse";
+import * as Papa from "papaparse";
 import { z } from "zod";
 import { runExtraction } from "../ai";
 import { sql } from "../db";
@@ -17,12 +17,13 @@ const requestSchema = z.object({
 
 function parseCsvFile(buffer: Buffer): RawCsvRow[] {
   const csvText = buffer.toString("utf-8").replace(/^\uFEFF/, "");
-  const parsed = Papa.parse<RawCsvRow>(csvText, {
+  const parsed = Papa.parse(csvText, {
     header: true,
     skipEmptyLines: true,
   });
+  const rows = parsed.data as RawCsvRow[];
 
-  if (parsed.errors.length > 0 && parsed.data.length === 0) {
+  if (parsed.errors.length > 0 && rows.length === 0) {
     throw new Error(parsed.errors[0]?.message || "Could not parse the CSV file.");
   }
 
