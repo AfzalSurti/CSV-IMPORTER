@@ -23,6 +23,10 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "GrowEasy · AI CSV Importer",
   description: "Import CRM leads from any CSV format using AI field mapping.",
+  icons: {
+    icon: "/favicon.svg",
+    shortcut: "/favicon.svg",
+  },
 };
 
 // Avoids a flash of the wrong theme by applying the saved preference before
