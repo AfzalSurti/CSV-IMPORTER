@@ -1,6 +1,8 @@
 import type { ExtractResponse, RawCsvRow } from "./types";
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000";
+// Normalize API URL: remove trailing slashes so joining paths below can't produce
+// URLs like `https://host//api/extract-file` which some hosts reject.
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000").replace(/\/+$/g, "");
 
 export interface ExtractCallbacks {
   onProgress?: (batchIndex: number, totalBatches: number) => void;
@@ -11,7 +13,8 @@ export interface ExtractCallbacks {
 async function handleSseResponse(res: Response, callbacks: ExtractCallbacks): Promise<void> {
   if (!res.ok || !res.body) {
     const text = await res.text().catch(() => "");
-    callbacks.onError?.(text || `Request failed with status ${res.status}`);
+    const url = (res as any)?.url || `${API_URL}/api/extract`;
+    callbacks.onError?.(text || `Request to ${url} failed with status ${res.status} ${res.statusText}`);
     return;
   }
 
