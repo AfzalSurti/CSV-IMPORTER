@@ -1,0 +1,10 @@
+services:
+  - type: web_service
+    name: groweasy-csv-importer-backend
+    env: docker
+    root: backend
+    dockerfilePath: Dockerfile
+    branch: main
+    autoDeploy: true
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
