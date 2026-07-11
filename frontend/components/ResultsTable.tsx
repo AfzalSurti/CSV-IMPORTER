@@ -101,25 +101,15 @@ function TabButton({
 }
 
 function ImportedTable({ records }: { records: ExtractResponse["imported"] }) {
-  const parentRef = useRef<HTMLDivElement>(null);
   const columns = useMemo(() => CRM_FIELDS, []);
-
-  const rowVirtualizer = useVirtualizer({
-    count: records.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 40,
-    overscan: 12,
-  });
 
   if (records.length === 0) {
     return <EmptyState message="No records were successfully mapped from this file." />;
   }
 
-  const items = rowVirtualizer.getVirtualItems();
-
   return (
     <div className="overflow-hidden rounded-xl border border-border">
-      <div ref={parentRef} className="max-h-[30rem] overflow-auto scrollbar-thin">
+      <div className="max-h-[30rem] overflow-auto scrollbar-thin">
         <table className="w-full border-collapse text-left font-data text-xs">
           <thead className="sticky top-0 z-10 bg-surface-raised">
             <tr>
@@ -133,41 +123,26 @@ function ImportedTable({ records }: { records: ExtractResponse["imported"] }) {
               ))}
             </tr>
           </thead>
-          <tbody style={{ height: rowVirtualizer.getTotalSize(), position: "relative", display: "block" }}>
-            {items.map((virtualRow) => {
-              const record = records[virtualRow.index];
-              return (
-                <tr
-                  key={virtualRow.key}
-                  style={{
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    transform: `translateY(${virtualRow.start}px)`,
-                    display: "table",
-                    tableLayout: "fixed",
-                  }}
-                  className="odd:bg-transparent even:bg-surface/60"
-                >
-                  {columns.map((col) => (
-                    <td
-                      key={col}
-                      className="max-w-[14rem] truncate whitespace-nowrap border-b border-l border-border px-4 py-2.5 first:border-l-0"
-                      title={record[col] || ""}
-                    >
-                      {col === "crm_status" && record[col] ? (
-                        <span className={STATUS_COLORS[record[col] as string] || "text-text"}>
-                          {record[col]}
-                        </span>
-                      ) : (
-                        record[col] || <span className="text-text-faint">—</span>
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              );
-            })}
+          <tbody>
+            {records.map((record, index) => (
+              <tr key={index} className="odd:bg-transparent even:bg-surface/60">
+                {columns.map((col) => (
+                  <td
+                    key={col}
+                    className="max-w-[14rem] truncate whitespace-nowrap border-b border-l border-border px-4 py-2.5 first:border-l-0"
+                    title={record[col] || ""}
+                  >
+                    {col === "crm_status" && record[col] ? (
+                      <span className={STATUS_COLORS[record[col] as string] || "text-text"}>
+                        {record[col]}
+                      </span>
+                    ) : (
+                      record[col] || <span className="text-text-faint">—</span>
+                    )}
+                  </td>
+                ))}
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
